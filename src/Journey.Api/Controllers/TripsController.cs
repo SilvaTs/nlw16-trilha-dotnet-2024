@@ -1,7 +1,8 @@
 ﻿using Journey.Application.UseCases.Trips.GetAll;
+using Journey.Application.UseCases.Trips.GetById;
 using Journey.Application.UseCases.Trips.Register;
 using Journey.Communication.Requests;
-using Journey.Exception.ExceptionsBase;
+using Journey.Communication.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Journey.Api.Controllers;
@@ -11,27 +12,19 @@ namespace Journey.Api.Controllers;
 public class TripsController : ControllerBase
 {
     [HttpPost]
+    [ProducesResponseType(typeof(ResponseShortTripJson), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public IActionResult Register([FromBody] RequestRegisterTripJson request)
     {
-        try
-        {
-            var useCase = new RegisterTripUseCase();
+        var useCase = new RegisterTripUseCase();
 
-            var response = useCase.Execute(request);
+        var response = useCase.Execute(request);
 
-            return Created(string.Empty, response);
-        }
-        catch (JourneyException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Erro desconhecido");
-        }
+        return Created(string.Empty, response);
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(ResponseTripsJson), StatusCodes.Status200OK)]
     public IActionResult GetAll()
     {
         var useCase = new GetAllTripUseCase();
@@ -39,5 +32,18 @@ public class TripsController : ControllerBase
         var result = useCase.Execute();
 
         return Ok(result);
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    [ProducesResponseType(typeof(ResponseTripJson), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    public IActionResult GetById([FromRoute] Guid id)
+    {
+        var useCase = new GetTripByIdUseCase();
+
+        var response = useCase.Execute(id);
+
+        return Ok(response);        
     }
 }
