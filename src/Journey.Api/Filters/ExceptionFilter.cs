@@ -14,7 +14,7 @@ public class ExceptionFilter : IExceptionFilter
             var journeyException = (JourneyException)context.Exception;
 
             context.HttpContext.Response.StatusCode = (int)journeyException.GetStatusCode();
-            context.Result = new NotFoundObjectResult(context.Exception.Message);
+            context.Result = new ObjectResult(context.Exception.Message);
         }
         else 
         {
